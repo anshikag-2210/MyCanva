@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyCanvas Studio</title>
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <!-- ============================ DASHBOARD ============================ -->
+  <div id="dashboard" class="screen hidden">
+    <header class="dash-top">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22"><rect x="2" y="2" width="9" height="9" rx="2" fill="#4f46e5"/><rect x="13" y="2" width="9" height="9" rx="2" fill="#0ea5e9"/><rect x="2" y="13" width="9" height="9" rx="2" fill="#f59e0b"/><circle cx="17.5" cy="17.5" r="4.5" fill="#10b981"/></svg>
+        </span>
+        <span class="brand-name">MyCanvas&nbsp;Studio</span>
+      </div>
+      <div class="dash-actions">
+        <button id="btnNewProject" class="btn btn-primary">+ New design</button>
+      </div>
+    </header>
+
+    <main class="dash-main">
+      <section class="dash-section">
+        <h2>Your designs</h2>
+        <div id="projectGrid" class="project-grid"></div>
+        <div id="emptyProjects" class="empty hidden">
+          <p>No designs yet. Start from a template below or create a blank design.</p>
+        </div>
+      </section>
+
+      <section class="dash-section">
+        <div class="dash-section-head">
+          <h2>Templates</h2>
+          <div class="template-search">
+            <input id="tplSearch" type="search" placeholder="Search templates…" />
+          </div>
+        </div>
+        <div id="templateGrid" class="template-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ============================ EDITOR ============================ -->
+  <div id="editor" class="screen hidden">
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="btnBack" class="btn btn-ghost" title="Back to dashboard">←</button>
+        <span class="brand-mark small" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18"><rect x="2" y="2" width="9" height="9" rx="2" fill="#4f46e5"/><rect x="13" y="2" width="9" height="9" rx="2" fill="#0ea5e9"/><rect x="2" y="13" width="9" height="9" rx="2" fill="#f59e0b"/><circle cx="17.5" cy="17.5" r="4.5" fill="#10b981"/></svg>
+        </span>
+        <input id="projectName" class="project-name" type="text" value="Untitled design" />
+      </div>
+
+      <div class="topbar-center">
+        <div class="seg" role="group" aria-label="History">
+          <button id="btnUndo" class="seg-btn" title="Undo (Ctrl+Z)">↶</button>
+          <button id="btnRedo" class="seg-btn" title="Redo (Ctrl+Shift+Z)">↷</button>
+        </div>
+        <div class="seg" role="group" aria-label="Zoom">
+          <button id="btnZoomOut" class="seg-btn" title="Zoom out">−</button>
+          <span id="zoomLabel" class="zoom-label">100%</span>
+          <button id="btnZoomIn" class="seg-btn" title="Zoom in">+</button>
+          <button id="btnZoomFit" class="seg-btn" title="Fit to screen">Fit</button>
+        </div>
+        <div class="seg" role="group" aria-label="Element actions">
+          <button id="btnDup" class="seg-btn" title="Duplicate (Ctrl+D)">⧉</button>
+          <button id="btnFront" class="seg-btn" title="Bring to front">▲</button>
+          <button id="btnBackZ" class="seg-btn" title="Send to back">▼</button>
+          <button id="btnDelete" class="seg-btn danger" title="Delete (Del)">🗑</button>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <button id="btnSave" class="btn btn-ghost">Save</button>
+        <div class="dropdown">
+          <button id="btnExport" class="btn btn-primary">Export ▾</button>
+          <div id="exportMenu" class="dropdown-menu hidden">
+            <button data-export="png">PNG image</button>
+            <button data-export="png2">PNG (2× retina)</button>
+            <button data-export="svg">SVG vector</button>
+            <button data-export="pdf">PDF (all pages)</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Body -->
+    <div class="editor-body">
+      <!-- Left tool rail + panel -->
+      <aside class="left">
+        <nav class="rail" id="toolRail">
+          <button data-tool="templates" title="Templates"><span>▦</span></button>
+          <button data-tool="elements" title="Elements"><span>◯</span></button>
+          <button data-tool="text" title="Text"><span>T</span></button>
+          <button data-tool="uploads" title="Uploads"><span>⬆</span></button>
+          <button data-tool="background" title="Background"><span>▤</span></button>
+          <button data-tool="brand" title="Brand"><span>✦</span></button>
+        </nav>
+        <div class="panel" id="leftPanel">
+          <div class="panel-head">
+            <h3 id="leftPanelTitle">Elements</h3>
+            <input id="leftSearch" class="panel-search" type="search" placeholder="Search…" />
+          </div>
+          <div class="panel-body" id="leftPanelBody"></div>
+        </div>
+      </aside>
+
+      <!-- Canvas -->
+      <div class="canvas-area" id="canvasArea">
+        <div class="canvas-scroll" id="canvasScroll">
+          <div class="board-wrap" id="boardWrap">
+            <div class="board" id="board">
+              <svg id="stage" xmlns="http://www.w3.org/2000/svg"></svg>
+              <div class="overlay" id="overlay"></div>
+            </div>
+          </div>
+        </div>
+        <div class="canvas-hint" id="canvasHint">Select an element, or add one from the left panel.</div>
+      </div>
+
+      <!-- Right properties -->
+      <aside class="right">
+        <div class="panel">
+          <div class="panel-head"><h3 id="rightPanelTitle">Properties</h3></div>
+          <div class="panel-body" id="rightPanelBody"></div>
+        </div>
+        <div class="panel layers-panel">
+          <div class="panel-head"><h3>Layers</h3></div>
+          <div class="panel-body" id="layersBody"></div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Bottom page strip -->
+    <footer class="pagestrip" id="pageStrip"></footer>
+  </div>
+
+  <!-- Hidden file input for uploads -->
+  <input type="file" id="fileInput" accept="image/*" multiple hidden />
+
+  <!-- Text edit overlay -->
+  <div id="textEditWrap" class="hidden">
+    <textarea id="textEdit" spellcheck="false"></textarea>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Generic modal root -->
+  <div id="modalRoot"></div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/elements.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
